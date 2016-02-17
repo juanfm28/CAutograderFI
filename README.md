@@ -1,6 +1,8 @@
 # CAutograderFI
 Autoevaluador para programas escolares de C. Programado en python 3.5.
 
+Únicamente funciona con gcc, por lo tanto, se recomienda unicamente su uso en Linux y MacOS X con gcc instalado.
+
 # Diseño
 TODO
 
