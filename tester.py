@@ -29,7 +29,7 @@ def compileSource(sourcefile):
     if not isfile(sourcefile):
         print("Codigo fuente no encontrado: ",sourcefile)
     else:
-        cmd = 'gcc -o '+sourcefile.replace('.c','')+' '+sourcefile
+        cmd = 'gcc -o '+sourcefile.replace('.c','.x')+' '+sourcefile
         proc = Popen(cmd , shell=True, stdout=PIPE, stderr=PIPE)
         out, err = proc.communicate()
         if proc.returncode == 0:

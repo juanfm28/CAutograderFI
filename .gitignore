@@ -60,3 +60,13 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+#Test/Solution Files:
+*.test
+*.solution
+
+#C sourcecode
+*.c
+
+#C compiled
+*.x
