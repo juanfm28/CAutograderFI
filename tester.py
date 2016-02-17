@@ -7,8 +7,9 @@ from subprocess import Popen,PIPE
 def runAllTests(testFile):
     programNames = getProgramNames(testFile)
     for program in programNames:
-    	compileSource(program+".c")
-    	testProgram(testFile,program)
+        print(program)
+        compileSource(testFile[0:testFile.rfind('/')+1]+program+".c")
+        testProgram(testFile,program)
 
 def testProgram(testFile,programName):
     print("Evaluando: ",programName)
@@ -68,7 +69,7 @@ def getTestsByProgram(testFile,programName):
             if program == programName:
                 flag = True
         elif line != '' and flag:
-            cmd.append(line)
+            cmd.append(testFile[0:testFile.rfind('/')+1]+line)
     test.close()
     if not cmd:
         print("Error: No existe el programa: ",programName)
