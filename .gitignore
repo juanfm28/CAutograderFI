@@ -61,6 +61,7 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 
+#Custom ignore
 #Test/Solution Files:
 *.test
 *.solution
@@ -70,3 +71,6 @@ target/
 
 #C compiled
 *.x
+
+#Input Files:
+*.input
