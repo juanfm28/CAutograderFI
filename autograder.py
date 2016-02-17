@@ -7,6 +7,7 @@ import tester
 parser = argparse.ArgumentParser(description='Selecciona las opciones de entrada')
 #Archivo de donde vienen las preguntas
 parser.add_argument('-t','--tests',action='store')
+parser.add_argument('-p','--program',action='store')
 #Parseo de las opciones
 args = parser.parse_args()
 
