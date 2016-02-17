@@ -17,4 +17,9 @@ if not args.tests:
 
 testFile = args.tests
 
-tester.runAllTests(testFile)
+if args.program: 
+    programs = args.program.split(',')
+    for program in programs:
+        tester.testProgram(testFile,program)
+else:
+    tester.runAllTests(testFile)
