@@ -36,9 +36,9 @@ La ejecución básica del programa se realiza con el comando
 ```sh
 python3 autograder.py
 ```
-Existen 3 opciones:
+Existen 4 opciones:
 ```sh
- -t (--tests) [file].test
+ -t (--tests) [file]
 ```
  Indica el archivo donde se encuentran las pruebas para el comando.
  No debe contener ninguna extension.
