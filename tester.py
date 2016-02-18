@@ -18,10 +18,13 @@ class Tester:
         self.testDir = testDir
         self.testFile = self.testDir+testFileCore+'.test'
         self.solutionFile = self.testDir+testFileCore+'.solution'
+        self.programNames = self.getProgramNames()
+
+    def setSourceCodeDir(self,sourceCodeDir):
+        self.sourceCodeDir = sourceCodeDir
 
     def runAllTests(self):
-        programNames = self.getProgramNames()
-        for program in programNames:
+        for program in self.programNames:
             self.compileSource(program)
             self.testProgram(program)
 
