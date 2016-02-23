@@ -41,25 +41,29 @@ class Tester:
             try:
                 raw_output = Tester.runCommand(cmd)
             except UnicodeDecodeError:
-                print('Salida no reconocible')
+                print("\n",'Salida no reconocible')
                 return 0.0
-            output = raw_output.rstrip().lstrip().replace("\x00","").replace('\n','').replace('\t',' ')
-            editedOutput = [value for value in output.split(' ') if value != '']
-            editedSolution = [value for value in solution.split(' ') if value != '']
-            #print(editedOutput)
-            #print(editedSolution)
-            if editedOutput == editedSolution:
-                print(cmd,": ",raw_output," Correcto")
+            if Tester.assertOutput(raw_output,solution):
+                print(cmd,": ",raw_output," Correcto","\n")
                 pointsObtained += 1
             else:
-                print(cmd,": \n",raw_output," \nIncorrecto. El resultado esperado era: \n",solution)
+                print("\n",cmd,": \n",raw_output," \n\nIncorrecto. El resultado esperado era: \n",solution,"\n")
         print("\nPasados en",programName, ": ",pointsObtained,'/',possiblePoints)
-        print("****************************")
+        print("********************************************************")
         try:
             rm(self.testDir+programName+'.x')
         except FileNotFoundError:
             pass
         return (pointsObtained*1.0)/(possiblePoints*1.0)
+
+    def assertOutput(raw_output,solution):
+        output = raw_output.lower().rstrip().lstrip().replace("\x00","").replace('\n','').replace('\t',' ')
+        editedOutput = [value for value in output.split(' ') if value != '']
+        editedSolution = [value for value in solution.lower().split(' ') if value != '']
+        #print(editedOutput)
+        #print(editedSolution)
+        return editedSolution == editedOutput
+
 
     def runCommand(cmd='echo "Hola mundo"'):
         proc = Popen(cmd , shell=True, stdout=PIPE, stderr=PIPE)
@@ -142,6 +146,8 @@ class Tester:
             out, err = proc.communicate()
             if proc.returncode == 0:
                 print("Programa compilado con exito: ",sourcefile)
+                if err:
+                    print("Advertencias: ",err.rstrip().decode('utf-8'))
             else:
                 print("Falló la compilación del programa: "+sourcefile+"\nErrores: ")
                 print(err.rstrip().decode('utf-8'))

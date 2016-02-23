@@ -36,7 +36,7 @@ tester = Tester(args.tests,testDir = testDirectory)
 for folder in os.listdir(groupDirectory):
     path = groupDirectory+folder+'/'
     if os.path.isdir(path):
-        print('|||||||||||||||||||||||||||||||||||||||||||||||||')
+        print('|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||')
         print("Evaluando a: ",folder)
         tester.setSourceCodeDir(path)
         if args.program: 
