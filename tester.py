@@ -104,7 +104,7 @@ class Tester:
                 if program == programName:
                     flag = True
             elif line != '' and flag:
-                line = line.replace('< ','< '+self.testDir)
+                line = line.replace('< ','< '+self.testDir).replace('!',self.testDir)
                 cmd.append(self.testDir+line)
         test.close()
         if not cmd:
