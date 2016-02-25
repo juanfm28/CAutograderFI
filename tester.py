@@ -44,7 +44,7 @@ class Tester:
                 print("\n",'Salida no reconocible')
                 return 0.0
             if Tester.assertOutput(raw_output,solution):
-                print(cmd,": ",raw_output," Correcto","\n")
+                print(cmd,": \n",raw_output," Correcto","\n")
                 pointsObtained += 1
             else:
                 print("\n",cmd,": \n",raw_output," \n\nIncorrecto. El resultado esperado era: \n",solution,"\n")
@@ -57,9 +57,9 @@ class Tester:
         return (pointsObtained*1.0)/(possiblePoints*1.0)
 
     def assertOutput(raw_output,solution):
-        output = raw_output.lower().rstrip().lstrip().replace("\x00","").replace('\n','').replace('\t',' ')
+        output = raw_output.lower().rstrip().lstrip().replace("\x00","").replace('\n',' ').replace('\t',' ')
         editedOutput = [value for value in output.split(' ') if value != '']
-        editedSolution = [value for value in solution.lower().split(' ') if value != '']
+        editedSolution = [value for value in solution.lower().replace('\n',' ').split(' ') if value != '']
         #print(editedOutput)
         #print(editedSolution)
         return editedSolution == editedOutput
@@ -127,7 +127,7 @@ class Tester:
                 if program == programName:
                     flag = True
             elif line != '' and flag:
-                solutions.append(line)
+                solutions.append(line.replace("\\n","\n"))
         test.close()
         if not solutions:
             print("Error: No existe ese programa en el archivo de solucion",programName)
