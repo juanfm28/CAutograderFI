@@ -74,3 +74,6 @@ target/
 
 #Input Files:
 *.input
+
+#Auxiliary Files
+*.txt
