@@ -46,19 +46,26 @@ Existen 4 opciones:
  Esta es la única opción obligatoria.
 
 ```sh
- -p (--program) [name]
+ -p (--program) [name(s)]
 ```
 
  Indica exactamente que programa(s) del archivo de pruebas se quiere probar. Debe indicarse sin ninguna extensión
+ Si son varios, deben estar separados por ',', sin espacios.
  
 ```sh
  -d (--directory) [directory] 
 ```
 
- Indica un directorio externo donde se encuentran los archivos necesarios para la ejecución. Debe terminar en '/'
+ Indica un directorio externo donde se encuentran los archivos necesarios para la ejecución y las pruebas Debe terminar en '/'
 
- ```sh
+```sh
  -s (--sourcedir) [directory]
- ```
+```
 
  Indica el directorio externo donde se encuentran los archivos de codigo fuente. Debe terminar en '/'
+
+```sh
+ -l (--libraries) [library(ies)]
+```
+
+ Indica las bibliotecas propias que se requieren para el/los programas. Debe indicarse el nombre sin la extension '.c', ni '.h'. Si son varias, deben ir separadas por ',', sin espacios.
