@@ -14,6 +14,8 @@ parser.add_argument('-p','--program',action='store')
 parser.add_argument('-d','--directory',action='store')
 #Bandera -d: indica el directorio donde están todos los directorios de cada persona/equipo por calificar
 parser.add_argument('-g','--groupdir',action='store')
+#Bandera -l: indica todas las bibliotecas propias necesarias para el programa. Se asume que están junto con el codigo fuente
+parser.add_argument('-l','--libraries',action='store')
 #Parseo de las opciones
 args = parser.parse_args()
 
@@ -32,13 +34,18 @@ if args.directory:
 #Si se le indico uno diferente, se cambia
 if args.groupdir:
     groupDirectory = args.groupdir
+
 #Si no se indica el directorio del grupo, tampoco se puede hacer nada con este programa
 else:
 	print("Se requiere un directorio del grupo")
 	exit()
 
+#Si se le indicaron librerias, se crea una lista separandolas con las comas como referencia
+if args.libraries:
+    libraries = args.libraries.split(',')
+
 #Se construye el objeto Tester
-tester = Tester(args.tests,testDir = testDirectory)
+tester = Tester(args.tests,testDir = testDirectory,libraries = libraries)
 
 #Por cada directorio en el directorio del grupo
 for folder in os.listdir(groupDirectory):

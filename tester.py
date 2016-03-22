@@ -7,12 +7,13 @@ from os import remove as rm
 
 class Tester:
     """Clase que controla todos los procesos de prueba"""
-    def __init__(self, testFile,sourceCodeDir = './',testDir = './'):
+    def __init__(self, testFile,sourceCodeDir = './',testDir = './',libraries=None):
         """Constructor de la clase Tester
 
         testFile -- Archivo donde estan contenidas las pruebas a pasar
         sourceCodeDir -- Directorio donde estan contenidos los codigos fuente, default='./'
         testDir -- Directorio donde estan contenidos los archivos necesarios para las pruebas, default='./'
+        libraries -- Lista de las bibliotecas necesarias
         """
         #Nombre del archivo de pruebas a usar sin extensión
         testFileCore = testFile
@@ -26,6 +27,12 @@ class Tester:
         self.solutionFile = self.testDir+testFileCore+'.solution'
         #Atributo de instancia programNames: Lista con todos los nombres de los programas que se probaran
         self.programNames = self.getProgramNames()
+        #Atributo de instancia needsLib: Bandera que me indica si es necesario agregar liberias
+        #Atributo de instancia libs: Lista de las librerias necesarias
+        if libraries: 
+            self.needsLib = True
+            self.libs = libraries
+        else: self.needsLib = False
 
     def setSourceCodeDir(self,sourceCodeDir):
         """Setter del atributo de instancia sourceCodeDir"""
@@ -242,21 +249,25 @@ class Tester:
 
     def compileSource(self,sourcefile):
         """Funcion que se encarga de ejecutar el compilador gcc sobre un archivo fuente"""
-        sourceCode = self.sourceCodeDir+sourcefile+'.c'
+        sourceCode = ""
+        if self.needsLib:
+            for lib in self.libs:
+                sourceCode += self.sourceCodeDir+lib+'.c'+' '
+        sourceCode += self.sourceCodeDir+sourcefile+'.c'
         exeDestination = self.testDir + sourcefile +'.x'
-        if not isfile(sourceCode):
-            print("Codigo fuente no encontrado: ",sourceCode)
-            return False
-        else:
-            cmd = 'gcc -o '+exeDestination+' '+sourceCode
-            proc = Popen(cmd , shell=True, stdout=PIPE, stderr=PIPE)
-            out, err = proc.communicate()
-            if proc.returncode == 0:
-                print("Programa compilado con exito: ",sourcefile)
-                if err:
-                    print("Advertencias: ",err.rstrip().decode('utf-8'))
-            else:
-                print("Falló la compilación del programa: "+sourcefile+"\nErrores: ")
-                print(err.rstrip().decode('utf-8'))
+        for code in sourceCode.split(' '):
+            if not isfile(code):
+                print("Codigo fuente no encontrado: ", code)
                 return False
+        cmd = 'gcc -o '+exeDestination+' '+sourceCode
+        proc = Popen(cmd , shell=True, stdout=PIPE, stderr=PIPE)
+        out, err = proc.communicate()
+        if proc.returncode == 0:
+            print("Programa compilado con exito: ",sourcefile)
+            if err:
+                print("Advertencias: ",err.rstrip().decode('utf-8'))
+        else:
+            print("Falló la compilación del programa: "+sourcefile+"\nErrores: ")
+            print(err.rstrip().decode('utf-8'))
+            return False
         return True
