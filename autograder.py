@@ -14,7 +14,7 @@ parser.add_argument('-d','--directory',action='store')
 #Bandera -s: indica el directorio donde está el archivo de codigo fuente por calificar
 parser.add_argument('-s','--sourcedir',action='store')
 #Bandera -l: indica todas las bibliotecas propias necesarias para el programa. Se asume que están junto con el codigo fuente
-parser.add_argument('-l','--libraries',action='store')
+#parser.add_argument('-l','--libraries',action='store')
 #Parseo de las opciones
 args = parser.parse_args()
 
@@ -35,11 +35,13 @@ if args.sourcedir:
     sourceDirectory = args.sourcedir
 
 #Si se le indicaron librerias, se crea una lista separandolas con las comas como referencia
-if args.libraries:
-	libraries = args.libraries.split(',')
+#if args.libraries:
+#	libraries = args.libraries.split(',')
 
 #Se construye el objeto Tester
-tester = Tester(args.tests,sourceDirectory,testDirectory,libraries)
+#tester = Tester(args.tests,sourceDirectory,testDirectory,libraries)
+tester = Tester(args.tests,sourceDirectory,testDirectory)
+
 
 #Si se indicaron algunos programas
 if args.program: 

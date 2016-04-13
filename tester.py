@@ -8,7 +8,7 @@ import signal
 
 class Tester:
     """Clase que controla todos los procesos de prueba"""
-    def __init__(self, testFile,sourceCodeDir = './',testDir = './',libraries=None):
+    def __init__(self, testFile,sourceCodeDir = './',testDir = './'):#,libraries=None):
         """Constructor de la clase Tester
 
         testFile -- Archivo donde estan contenidas las pruebas a pasar
@@ -30,10 +30,10 @@ class Tester:
         self.programNames = self.getProgramNames()
         #Atributo de instancia needsLib: Bandera que me indica si es necesario agregar liberias
         #Atributo de instancia libs: Lista de las librerias necesarias
-        if libraries: 
-            self.needsLib = True
-            self.libs = libraries
-        else: self.needsLib = False
+        #if libraries: 
+        #    self.needsLib = True
+        #    self.libs = libraries
+        #else: self.needsLib = False
 
     def setSourceCodeDir(self,sourceCodeDir):
         """Setter del atributo de instancia sourceCodeDir"""
@@ -50,7 +50,7 @@ class Tester:
            Argumentos:
            programName: Nombre del programa a evaluar. Debe existir tanto en el archivo de pruebas, como en el de soluciones"""
         #Indicador al usuario de que programa se está probando
-        print("Evaluando: ",programName)
+        print("Evaluando: ",programName.split('%')[0])
         #Se compila el programa usando la función y se guarda su retorno para saber si fue exitosa la compilación
         success = self.compileSource(programName)
         #Si no pudo compilarse, regresa
@@ -86,7 +86,7 @@ class Tester:
                 #Imprime tanto el comando, como su resultado y el resultado esperado
                 print("\n",cmd,": \n",raw_output," \n\nIncorrecto. El resultado esperado era: \n",solution,"\n")
         #Cuando se terminen de ejecutar las pruebas, se informa cuantos se pasaron en este programa
-        print("\nPasados en",programName, ": ",pointsObtained,'/',possiblePoints)
+        print("\nPasados en",programName.split('%')[0], ": ",pointsObtained,'/',possiblePoints)
         #Separador de programa
         print("********************************************************")
         #Para mantener limpio el directorio, el ejecutable generado se elimina
@@ -237,7 +237,7 @@ class Tester:
                 #Si no elimina los ## para obtener el nombre puro
                 program = line.replace('##','')
                 #Si el programa que encontré es el que buscaba, levanta la bandera
-                if program == programName:
+                if program == programName.split('%')[0]:
                     flag = True
             #Si no es un nombre de programa (iniciado con ##) y la bandera ya esta arriba, significa que es una solucion
             elif line != '' and flag:
@@ -247,19 +247,22 @@ class Tester:
         test.close()
         #Si el archivo de soluciones terminó vacío, el programa no existía y se informa
         if not solutions:
-            print("Error: No existe ese programa en el archivo de solucion",programName)
+            print("Error: No existe ese programa en el archivo de solucion",programName.split('%')[0])
         #De cualquier forma se regresa el archivo de soluciones
         return solutions
 
     def compileSource(self,sourcefile):
         """Funcion que se encarga de ejecutar el compilador gcc sobre un archivo fuente"""
         sourceCode = ""
-        if self.needsLib:
-            for lib in self.libs:
-                sourceCode += self.sourceCodeDir+lib+'.c'+' '
-        sourceCode += self.sourceCodeDir+sourcefile+'.c'
-        exeDestination = self.testDir + sourcefile +'.x'
-        for code in sourceCode.split(' '):
+        src = sourcefile.split('%')
+        #if self.needsLib:
+        #    for lib in self.libs:
+        #        sourceCode += self.sourceCodeDir+lib+'.c'+' '
+        #sourceCode += self.sourceCodeDir+sourcefile+'.c'
+        for f in src:
+            sourceCode += ' '+self.sourceCodeDir+f+'.c'
+        exeDestination = self.testDir + sourcefile.split('%')[0] +'.x'
+        for code in sourceCode.strip().split(' '):
             if not isfile(code):
                 print("Codigo fuente no encontrado: ", code)
                 return False
@@ -267,7 +270,7 @@ class Tester:
         proc = Popen(cmd , shell=True, stdout=PIPE, stderr=PIPE)
         out, err = proc.communicate()
         if proc.returncode == 0:
-            print("Programa compilado con exito: ",sourcefile)
+            print("Programa compilado con exito: ",sourcefile.split('%')[0])
             if err:
                 print("Advertencias: ",err.rstrip().decode('utf-8'))
         else:
@@ -275,3 +278,4 @@ class Tester:
             print(err.rstrip().decode('utf-8'))
             return False
         return True
+
