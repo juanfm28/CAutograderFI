@@ -4,6 +4,7 @@
 from os.path import isfile
 from subprocess import Popen,PIPE
 from os import remove as rm
+import signal
 
 class Tester:
     """Clase que controla todos los procesos de prueba"""
@@ -128,7 +129,10 @@ class Tester:
         #Obtenemos la salida estandar y la salida de error del subproceso
         out, err = proc.communicate()
         #Si existen errores o warnings al ejecutar el comando se informa
-        if err:
+        if proc.returncode == -11:
+            print("Ocurrio una violación de segmento!!") 
+
+        if err: #!= b'\n':
             print("Ocurrio un error o warning: ")
             #Se regresa el resultado de la salida estandar de errores, decifrado como si fuera utf-8
             return err.decode('utf-8')
