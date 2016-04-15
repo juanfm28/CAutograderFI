@@ -16,6 +16,8 @@ parser.add_argument('-d','--directory',action='store')
 parser.add_argument('-g','--groupdir',action='store')
 #Bandera -l: indica todas las bibliotecas propias necesarias para el programa. Se asume que están junto con el codigo fuente
 #parser.add_argument('-l','--libraries',action='store')
+#Bandera -f: indica si quiero que me muestre que diferencias hay en el resultado producido por el programa
+parser.add_argument('-f','--diff',action='store_true')
 #Parseo de las opciones
 args = parser.parse_args()
 
@@ -47,6 +49,10 @@ else:
 #Se construye el objeto Tester
 #tester = Tester(args.tests,testDir = testDirectory,libraries = libraries)
 tester = Tester(args.tests,testDir = testDirectory)
+
+#Si existe la bandera -f, se activa la muestra de diferencias
+if args.diff:
+    tester.toggleDiff()
 
 #Por cada directorio en el directorio del grupo
 for folder in os.listdir(groupDirectory):

@@ -28,6 +28,7 @@ class Tester:
         self.solutionFile = self.testDir+testFileCore+'.solution'
         #Atributo de instancia programNames: Lista con todos los nombres de los programas que se probaran
         self.programNames = self.getProgramNames()
+        self.showDiff = False
         #Atributo de instancia needsLib: Bandera que me indica si es necesario agregar liberias
         #Atributo de instancia libs: Lista de las librerias necesarias
         #if libraries: 
@@ -38,6 +39,10 @@ class Tester:
     def setSourceCodeDir(self,sourceCodeDir):
         """Setter del atributo de instancia sourceCodeDir"""
         self.sourceCodeDir = sourceCodeDir
+
+    def toggleDiff(self):
+        """Setter para la muestra de diferencias en el resultado"""
+        self.showDiff = not self.showDiff
 
     def runAllTests(self):
         """Función que ejecuta todos los test existentes"""
@@ -85,13 +90,15 @@ class Tester:
             else:
                 #Imprime tanto el comando, como su resultado y el resultado esperado
                 print("\n",cmd,": \n",raw_output," \n\nIncorrecto. El resultado esperado era: \n",solution,"\n")
+                #Si esta activado, se muestran que diferencias hay en el codigo
+                if self.showDiff: Tester.showDifferences(raw_output,solution)
         #Cuando se terminen de ejecutar las pruebas, se informa cuantos se pasaron en este programa
-        print("\nPasados en",programName.split('%')[0], ": ",pointsObtained,'/',possiblePoints)
+        print("\nCorrectos en",programName.split('%')[0], ": ",pointsObtained,'/',possiblePoints)
         #Separador de programa
         print("********************************************************")
         #Para mantener limpio el directorio, el ejecutable generado se elimina
         try:
-            rm(self.testDir+programName+'.x')
+            rm(self.testDir+programName.split('%')[0]+'.x')
         except FileNotFoundError:
             pass
         #Al final de la ejecución de las pruebas, se pretende regresar la calificación de quien fue revisado
@@ -117,6 +124,15 @@ class Tester:
         #print(editedSolution)
         #Se compararn ambas listas y se regresa el resultado de dicha comparación
         return editedSolution == editedOutput
+
+    def showDifferences(raw_output,solution):
+        """Función que imprime las diferencias entre la salida esperada y la salida que produce el programa evaluado"""
+        print("Diferencias: ")
+        i = 1
+        for lineO,lineS in zip(raw_output.split('\n'),solution.split('\n')):
+            if lineO.strip() != lineS.strip():
+                print(i,": ",lineS," ---> ",lineO)
+            i += 1
 
 
     def runCommand(cmd='echo "Hola mundo"'):
@@ -278,4 +294,3 @@ class Tester:
             print(err.rstrip().decode('utf-8'))
             return False
         return True
-

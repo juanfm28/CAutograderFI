@@ -15,6 +15,8 @@ parser.add_argument('-d','--directory',action='store')
 parser.add_argument('-s','--sourcedir',action='store')
 #Bandera -l: indica todas las bibliotecas propias necesarias para el programa. Se asume que están junto con el codigo fuente
 #parser.add_argument('-l','--libraries',action='store')
+#Bandera -f: indica si quiero que me muestre que diferencias hay en el resultado producido por el programa
+parser.add_argument('-f','--diff',action='store_true')
 #Parseo de las opciones
 args = parser.parse_args()
 
@@ -42,6 +44,9 @@ if args.sourcedir:
 #tester = Tester(args.tests,sourceDirectory,testDirectory,libraries)
 tester = Tester(args.tests,sourceDirectory,testDirectory)
 
+#Si existe la bandera -f, se activa la muestra de diferencias
+if args.diff:
+    tester.toggleDiff()
 
 #Si se indicaron algunos programas
 if args.program: 
