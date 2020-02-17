@@ -8,7 +8,7 @@ import signal
 
 class Tester:
     """Class that controls all the test processes"""
-    def __init__(self, testFile,sourceCodeDir = './',testDir = './'):
+    def __init__(self, testFile,sourceCodeDir = './',testDir = './',libraries=None):
         """Tester class builder
 
         testFile -- file where the tests are storedArchivo donde estan contenidas las pruebas a pasar
@@ -28,6 +28,11 @@ class Tester:
         #instance attribute: List with the name of all programs to test
         self.programNames = self.getProgramNames()
         self.showDiff = False
+        #Atributo de instancia libs: Lista de las librerias necesarias
+        if libraries:
+            self.needsLib = True
+            self.libs = libraries
+        else: self.needsLib = False
 
 
     def setSourceCodeDir(self,sourceCodeDir):
@@ -80,6 +85,7 @@ class Tester:
                 #Print both the test and its result and informs the user this was correct
                 print(cmd,": \n",raw_output," Correct","\n")
                 #One point is added to the grading
+                pointsObtained += 1
             #if the output is not similar enough...
             else:
                 #Print both the test and its result, along with the expected output
@@ -260,6 +266,9 @@ class Tester:
         sourceCode = ""
         #The source file is split in its many components
         src = sourcefile.split('%')
+        if self.needsLib:
+            for lib in self.libs:
+                sourceCode += self.sourceCodeDir+lib+'.c'+' '
         #For every file in the list, the extension '.c' is added
         for f in src:
             sourceCode += ' '+self.sourceCodeDir+f+'.c'
