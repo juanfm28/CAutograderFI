@@ -63,11 +63,11 @@ target/
 
 #Custom ignore
 #Test/Solution Files:
-*.test
-*.solution
+#*.test
+#*.solution
 
 #C sourcecode
-*.c
+#*.c
 
 #C compiled
 *.x

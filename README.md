@@ -1,71 +1,66 @@
 # CAutograderFI
-Autoevaluador para programas escolares de C. Programado en python 3.5.
+Automatic evaluator for school assignments written in C. Written in Python 3.5
+Created originally for the Data Structures and Algorithms I course for Engineering students, taught at Universidad Nacional Autonoma de Mexico.
 
-Únicamente funciona con gcc, por lo tanto, se recomienda unicamente su uso en Linux y MacOS X con gcc instalado.
+The grader uses gcc as a compiler, hence it is recommended its use in Linux and MacOS X with gcc installed.
 
-# Diseño
-El programa consiste en dos modulos principales.
+# Design
+The program consists in two principal modules:
 
-autograder.py: se encarga de parsear las opciones del programa, validar si se pasaron o no y de crear el objeto Tester para que se realicen las pruebas
+autograder.py: it is in charge of parsing the execution flags, validate if they are valid or not and create the Tester object to perform the tests.
 
-tester.py: Aqui se encuentra la clase Tester, que se encarga de leer los archivos de pruebas y soluciones, compilar los codigos fuente y ejecutar las pruebas.
+tester.py: Here is the main class, who is in charge of reading the test and solution files, compile the source code of the assignments and execute the tests.
 
-Los archivos de prueba son archivos de texto con la extension '.test'. Tienen el siguiente formato:
+The test programs are plain text files with the extension '.test'. They present the following format:
 
-\#\#programa1
-comando
-comando
+\#\#program1
+command
+command
 ...
 
-\#\#programa2
-comando
-comando
+\#\#program2
+command
+command
 ...
 
 ...
 
-El archivo de solucion debe seguir el mismo formato, pero en el lugar de los comandos se encuentran la salida que se espera del programa. Estas salidas no deben tener saltos de linea para mantener el paralelismo con el archivo de pruebas.
+The solution file must follow the same format but instead of commands each line contains the output result expected from the program. This output must not contain new lines to mantain the parallelism with the test file.
 
-# Instrucciones de uso
-Antes de utilizar este programa es necesario revisar o crear los archivos de pruebas (.test) y de soluciones (.solution). 
+Sample files are provided with the project
 
-Es importante que el codigo fuente tenga el mismo nombre que tiene en los archivos de pruebas para el correcto funcionamiento del evaluador
+# Use manual
+Before using this program is necessary to check and/or create the respective test files (.test) and solution(.solution)
+Antes de utilizar este programa es necesario revisar o crear los archivos de pruebas (.test) y de soluciones (.solution).
 
-La ejecución básica del programa se realiza con el comando
+It is important that the source code has the same name of both .test and .solution files for the evaluator right performance
+
+The basic execution of the program goes as follows
 
 ```sh
 python3 autograder.py
 ```
-Existen 4 opciones:
+There are 3 possible execution options:
 ```sh
  -t (--tests) [file]
 ```
- Indica el archivo donde se encuentran las pruebas para el comando.
- No debe contener ninguna extension.
-
- Esta es la única opción obligatoria.
+ Gives the path to the test file. It must not contain any extension.
+ This is the only mandatory option.
 
 ```sh
  -p (--program) [name(s)]
 ```
 
- Indica exactamente que programa(s) del archivo de pruebas se quiere probar. Debe indicarse sin ninguna extensión
- Si son varios, deben estar separados por ',', sin espacios.
- 
+ Indicates exactly which programs from the test file the user wants to use. They must be named without any extension. If there are many, they must be separated by ',', no spaces
+
 ```sh
- -d (--directory) [directory] 
+ -d (--directory) [directory]
 ```
 
- Indica un directorio externo donde se encuentran los archivos necesarios para la ejecución y las pruebas Debe terminar en '/'
+ Signals an external directory where the necessary files for execution and test are located. It must end in '/'
 
 ```sh
  -s (--sourcedir) [directory]
 ```
 
- Indica el directorio externo donde se encuentran los archivos de codigo fuente. Debe terminar en '/'
-
-```sh
- -l (--libraries) [library(ies)]
-```
-
- Indica las bibliotecas propias que se requieren para el/los programas. Debe indicarse el nombre sin la extension '.c', ni '.h'. Si son varias, deben ir separadas por ',', sin espacios.
+ Signals the external directory where the source code files to evaluate are located. It must end in '/'

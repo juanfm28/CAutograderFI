@@ -1,133 +1,123 @@
 # -*- coding: utf-8 -*-
 
-#Modulo de asserts
+#Test module
 from os.path import isfile
 from subprocess import Popen,PIPE
 from os import remove as rm
 import signal
 
 class Tester:
-    """Clase que controla todos los procesos de prueba"""
-    def __init__(self, testFile,sourceCodeDir = './',testDir = './'):#,libraries=None):
-        """Constructor de la clase Tester
+    """Class that controls all the test processes"""
+    def __init__(self, testFile,sourceCodeDir = './',testDir = './'):
+        """Tester class builder
 
-        testFile -- Archivo donde estan contenidas las pruebas a pasar
-        sourceCodeDir -- Directorio donde estan contenidos los codigos fuente, default='./'
-        testDir -- Directorio donde estan contenidos los archivos necesarios para las pruebas, default='./'
-        libraries -- Lista de las bibliotecas necesarias
+        testFile -- file where the tests are storedArchivo donde estan contenidas las pruebas a pasar
+        sourceCodeDir -- Directory where the source code is stored, default='./'
+        testDir -- Directory where the test files are stored, default='./'
         """
-        #Nombre del archivo de pruebas a usar sin extensión
+        #Name of the test file to use without extension.
         testFileCore = testFile
-        #Atributo de instancia sourceCodeDir: Directorio de los codigos fuente
+        #Instance attribute: Directory of the source code files
         self.sourceCodeDir = sourceCodeDir
-        #Atributo de instancia testDir: Directorio del archivo de pruebas
+        #instance attribute: Directory of the test files
         self.testDir = testDir
-        #Atributo de instancia testFile: Path completo del archivo de pruebas
+        #instance attribute: Full path to the test file
         self.testFile = self.testDir+testFileCore+'.test'
-        #Atributo de instancia solutionFile: Path completo del archivo de soluciones 
+        #instance attribute: Full path to the solution file
         self.solutionFile = self.testDir+testFileCore+'.solution'
-        #Atributo de instancia programNames: Lista con todos los nombres de los programas que se probaran
+        #instance attribute: List with the name of all programs to test
         self.programNames = self.getProgramNames()
         self.showDiff = False
-        #Atributo de instancia needsLib: Bandera que me indica si es necesario agregar liberias
-        #Atributo de instancia libs: Lista de las librerias necesarias
-        #if libraries: 
-        #    self.needsLib = True
-        #    self.libs = libraries
-        #else: self.needsLib = False
+
 
     def setSourceCodeDir(self,sourceCodeDir):
-        """Setter del atributo de instancia sourceCodeDir"""
+        """Setter for the instance attribute sourceCodeDir"""
         self.sourceCodeDir = sourceCodeDir
 
     def toggleDiff(self):
-        """Setter para la muestra de diferencias en el resultado"""
+        """Toggle for showing the difference in results"""
         self.showDiff = not self.showDiff
 
     def runAllTests(self):
-        """Función que ejecuta todos los test existentes"""
-        #Por cada programa en la lista ejecuta la funcion que prueba un programa
+        """Function that automatically runs all the programs in the file"""
+        #For each program in the list execute the function that test a program.
         for program in self.programNames:
             self.testProgram(program)
 
     def testProgram(self,programName):
-        """Función que evalua un programa
-           Argumentos:
-           programName: Nombre del programa a evaluar. Debe existir tanto en el archivo de pruebas, como en el de soluciones"""
-        #Indicador al usuario de que programa se está probando
-        print("Evaluando: ",programName.split('%')[0])
-        #Se compila el programa usando la función y se guarda su retorno para saber si fue exitosa la compilación
+        """Function that evaluates a whole program
+
+           Parameters:
+           programName: Name of the program to evaluate. It must exist both in the test and the solution files"""
+        #It informs the user which program is being evaluated
+        print("Evaluating: ",programName.split('%')[0])
+        #The program is compiled used the custom function and the output is stored to know if the compilation was succesful.
         success = self.compileSource(programName)
-        #Si no pudo compilarse, regresa
+        #If the program did not compile, the function stops and returns.
         if not success:
             return
-        #Se obtiene una lista con las pruebas que se ejecutaran por cada programa en forma de comandos.
+        #Get a list with the test to perform per program in the form of commands.
         cmds = self.getTestsByProgram(programName)
-        #Se obtiene una lista con las soluciones esperadas de cada prueba por programa.
+        #Get a list of the expected outputs for each test for each program.
         solutions = self.getSolutionsByProgram(programName)
-        #Variable para el numero de pruebas de este programa
+        #Variable for the total number of tests in this program to evaluate
         possiblePoints = len(cmds)
-        #Variable para los puntos obtenidos 
+        #Variable that will store the points earned
         pointsObtained = 0
-        #Se juntan cada prueba con su solución para realizarlas
-        #El comando de la prueba se encuentra en cmd y la salida esperada se encuentra en solution
+        #Each test is zipped with its solution to iterate over them
+        #The current test command is in cmd and the expected output in solution
         for cmd,solution in zip(cmds,solutions):
-            #Se intenta ejecutar la prueba actual ejecutando el comando en cmd
+            #The script tries to execute the current test using the command in the variable cmd
             try:
                 raw_output = Tester.runCommand(cmd)
-            #Es posible que al ejecutar el comando no pueda leer el resultado, lo cual arroja esta excepción
+            #It is possible that the output is unreadable, which triggers this exception
             except UnicodeDecodeError:
-                #Si no es posible leer la salida del comando ejecutado, se informa y se regresa 0
-                print("\n",'Salida no reconocible')
+                #If it was not possible, it is informed to the user and the function ends with 0.
+                print("\n",'Non-readable output')
                 return 0.0
-            #Si el resultado de la prueba corresponde a lo esperado de acuerdo a las condiciones establecidas...
+            #if the result of the test corresponds with the expected output...
             if Tester.assertOutput(raw_output,solution):
-                #Imprime tanto la prueba como su resultado e informa que es correcto
-                print(cmd,": \n",raw_output," Correcto","\n")
-                #Se suma un punto a los obtenidos
-                pointsObtained += 1
-            #Si no es lo suficientemente parecida
+                #Print both the test and its result and informs the user this was correct
+                print(cmd,": \n",raw_output," Correct","\n")
+                #One point is added to the grading
+            #if the output is not similar enough...
             else:
-                #Imprime tanto el comando, como su resultado y el resultado esperado
-                print("\n",cmd,": \n",raw_output," \n\nIncorrecto. El resultado esperado era: \n",solution,"\n")
-                #Si esta activado, se muestran que diferencias hay en el codigo
+                #Print both the test and its result, along with the expected output
+                print("\n",cmd,": \n",raw_output," \n\nIncorrect. The expected output was: \n",solution,"\n")
+                #If this was activated, the exact differences in the outputs are shown
                 if self.showDiff: Tester.showDifferences(raw_output,solution)
-        #Cuando se terminen de ejecutar las pruebas, se informa cuantos se pasaron en este programa
-        print("\nCorrectos en",programName.split('%')[0], ": ",pointsObtained,'/',possiblePoints)
-        #Separador de programa
+        #When the tests are completed, the script informs how many tests were passed in this program
+        print("\nCorrect in",programName.split('%')[0], ": ",pointsObtained,'/',possiblePoints)
+        #This print a separator for the next program to be easy to recognize
         print("********************************************************")
-        #Para mantener limpio el directorio, el ejecutable generado se elimina
+        #To keep the directory clean, the executables are eliminated
         try:
             rm(self.testDir+programName.split('%')[0]+'.x')
         except FileNotFoundError:
             pass
-        #Al final de la ejecución de las pruebas, se pretende regresar la calificación de quien fue revisado
+        #In the end, the grade is returned back to this function's caller
         #TODO: Recibir este dato en algún lado
         return (pointsObtained*1.0)/(possiblePoints*1.0)
 
     def assertOutput(raw_output,solution):
-        """Funcion que determina si el resultado es lo suficientemente parecido al esperado como para ser admitido
-            Argumentos:
-            raw_output: Resultado generado por el programa
-            solution: Solución esperada de la prueba"""
-        #La salida directa del comando se formatea de la siguiente forma
-        #Se pasa todo a minusculas, se quitan los espacios antes y despues,
-        # se remplazan los caracteres especiales \n \t y \x00 por espacios
+        """Function that asserts if the result is similar enough to the expected output to be admissible.
+            Arguments:
+            raw_output: result output
+            solution: expected output for the test"""
+        #The raw output received is formatted in the following way:
+        #Everything is passed to lowercase, and whitespace is trimmed
+        #Special characters such as \n \t and \x00 are replaced by one white space character
         output = raw_output.lower().rstrip().lstrip().replace("\x00","").replace('\n',' ').replace('\t',' ')
-        #posteriormente se convierte en una lista con split y se eliminan todos los espacios encontrados, para que se tomen en cuenta
-        #solo las palabras validas y su orden
+        #Next, it is converted in a list using split and all the spaces are eliminated, in an attempt for tokenize the output, so only the tokens and their orden matter
         editedOutput = [value for value in output.split(' ') if value != '']
-        #Para la solucion esperada, solo se cambian los saltos de línea, se convierte en una lista y de esa lista se eliminan las cadenas vacias
-        #correspondientes a donde habia un espacio en la impresión 
+        #For the expected output only the new lines are replaced, the strings becomes a list and all empty tokens are eliminated
         editedSolution = [value for value in solution.lower().replace('\n',' ').split(' ') if value != '']
-        #print(editedOutput)
-        #print(editedSolution)
-        #Se compararn ambas listas y se regresa el resultado de dicha comparación
+        #Both lists are compared and the result is sent back
         return editedSolution == editedOutput
 
     def showDifferences(raw_output,solution):
-        """Función que imprime las diferencias entre la salida esperada y la salida que produce el programa evaluado"""
-        print("Diferencias: ")
+        """Function that prints the differences between the expected output and the result output from the evaluation"""
+        print("Differences: ")
         i = 1
         for lineO,lineS in zip(raw_output.split('\n'),solution.split('\n')):
             if lineO.strip() != lineS.strip():
@@ -135,162 +125,167 @@ class Tester:
             i += 1
 
 
-    def runCommand(cmd='echo "Hola mundo"'):
-        """Funcion que ejecuta un comando
-        Argumentos
-        cmd: Comando a ejecutar. Default: echo "Hola mundo"
+    def runCommand(cmd='echo "Hello world"'):
+        """Wrapper function to execute commands.
+        Arguments
+        cmd: Command to execute. Default: echo "Hellow world"
         """
-        #Se abre un subproceso que ejecute el comando
+        #A background process is opened to execute the program
         proc = Popen(cmd , shell=True, stdout=PIPE, stderr=PIPE)
-        #Obtenemos la salida estandar y la salida de error del subproceso
+        #The standard output and error output from the subprocess is captured
         out, err = proc.communicate()
-        #Si existen errores o warnings al ejecutar el comando se informa
+        #IF there are errors or warnings, this is informed to the user
         if proc.returncode == -11:
-            print("Ocurrio una violación de segmento!!") 
+            print("Segment violation!!")
 
         if err: #!= b'\n':
-            print("Ocurrio un error o warning: ")
-            #Se regresa el resultado de la salida estandar de errores, decifrado como si fuera utf-8
+            print("Error or Warning: ")
+            #The standard error output is prined in utf-8
             return err.decode('utf-8')
         else:
-            #Si no existen errores, se regresa el resultado de la salida estandar, decifrado como texto utf-8
+            #If there are no errors, the result is read from the standard output in utf-8
             return out.decode('utf-8')
 
     def getProgramNames(self):
-        """Función que obtiene todos los programas existentes en un archivo de prueba"""
-        #Inicia con una lista de nombres vacia
+        """Function that parses all the programs existing in a test file"""
+        #Starting with an empty string list
         names = []
-        #Se intenta abrir el archivo de pruebas. Este se obtiene del atributo de instancia. Se abre como de solo lectura
+        #It tries to open the test file. The path is obtained from the instance attribute. It is opened read-only to maintain the data
         try:
             test = open(self.testFile,'r')
-        #Si no es posible encontrar el archivo, se informa y se regresa la lista vacía 
+        #If it is not possible to find the file, this is informed to the user and the empty list is sent back
         except FileNotFoundError:
-            print("Archivo de pruebas no encontrado: ",self.testFile)
+            print("Test file not found: ",self.testFile)
             return names
-        #Por cada linea en el archivo
+        #For each line in the file
         for line in test:
-            #Se desprecian las lineas vacias (que solo tienen un |n)
+            #The empty lines are eliminated. (They only have a new line character)
             line = line.replace('\n','');
-            #Si la linea no es una de estas vacias e inicia con ## eso significa que es el nombre de un programa
+            #If the line is not empty, and it starts with ##, this means this is the name of a program and the start of its tests
             if line != "" and line.startswith('##'):
-                #Se agrega el nombre del programa, quitandole los ## del inicio
+                #The name of the program is added
                 names.append(line.replace('##',''))
-        #Finalmente se cierra el archivo
+        #The file is closed
         test.close()
-        #Se regresa la lista de nombres
+        #The list of names is returned
         return names
 
     def getTestsByProgram(self,programName):
-        """Función que obtiene todos los test que se realizaran para un programa, contenidos en el archivo de tests
-           Argumentos:
-           programName: Nombre del programa del cual quiero obtener los tests"""
-        #La ejecucion requerira una bandera, que me dice que ya se estaban extrayendo los test del programa que queria
+        """Function that fetches all the tests intended for one program, contained in the test file.
+           Arguments:
+           programName: Name of the program I want to obtain the tests from."""
+        #The execution requires a flag, this tells me that the test from this program were already being fetched.
         flag = False
-        #Se inicia con una lista de comandos vacia
+        #It starts with an empty list
         cmd = []
-        #Se intenta abrir el archivo de pruebas. Este se obtiene del atributo de instancia. Se abre como de solo lectura
+        #An attempt to open the test file is made. The path is obtained from the instance attribute. It is opened read-only to maintain the data
         try:
             test = open(self.testFile,'r')
-        #Si no es posible encontrar el archivo, se informa y se regresa la lista vacía 
+        #If it is not possible to find the file, this is informed to the user and the empty list is sent back
         except FileNotFoundError:
-            print("Archivo de pruebas no encontrado: ",self.testFile)
+            print("Test file not found: ",self.testFile)
 
-        #Por cada linea en el archivo
+        #For each line in the file
         for line in test:
-            #Se desprecian las lineas vacias (que solo tienen un |n)
+            #The empty lines are discarded (they only have a \n)
             line = line.replace('\n','');
-            #Si la linea no es una de estas vacias e inicia con ## eso significa que es el nombre de un programa
+            #If the line is not empty and starts with ## it is the name of a program and the start of its tests
             if line.startswith('##'):
-                #Si ya estaba sacando los tests, encontrar otro nombre de programa significa que ya acabé
+                #if I was already processing a program, finding another name means that I finished with this program, so it will break out of the loop.
                 if flag: break
-                #Si no elimina los ## para obtener el nombre puro
+                #if I hadn't start this process before, the ## are replaced to obtain the name of the program
                 program = line.replace('##','')
-                #Si el programa que encontré es el que buscaba, levanta la bandera
+                #If the program found is the one I was looking for, the flag goes up
                 if program == programName:
                     flag = True
-            #Si no es un nombre de programa (iniciado con ##) y la bandera ya esta arriba, significa que es un test
+            #If its not a program name but the flag is up, it is part of the programs test
             elif line != '' and flag:
-                #Requiere cierto formato
-                #Cuando en un comando se encuentre un < eso quiere decir que necesita una redireccion de entrada,
-                #a este simbolo se le agrega el directorio de pruebas, porque se espera que ahí esté el archivo necesario
-                #Cuando existe un ! quiere decir que ese argumento a main es un archivo, y se le agrega el directorio de las pruebas
-                #pues se asume que ese archivo que se le va a pasar al programa esta en el directorio de las pruebas
+                #This test requires a certain format.
+                #When a < is found in a command this means that the standard input must be redirected to a file. To this symbol, the script ads the test directory, because it is assumed that the target file is there.
+                #When a ! is found, this means that this argument is a file, so the test directory replaces the !. This, again, because it is assumed that file is in the test directory.
                 line = line.replace('< ','< '+self.testDir).replace('!',self.testDir)
-                #A la lista de comandos se agrega la linea leída, pero antes se le anexa el directorio de las pruebas, porque ahi se espera
-                #que se construya el ejecutable cuando se compile con este mismo evaluador
+                #To the command line we add the read line, but the test directory is again added at the beginning of the command cause it is assumed that the executable will be there after this script compiles it.
                 cmd.append(self.testDir+line)
-        #Se cierra el archivo
+        #The file is closed
         test.close()
-        #Si la lista termina vacia, se informa que no existe el programa
+        #If the list is empty, then it is informed to the user that such program does not exist in the file
         if not cmd:
-            print("Error: No existe el programa: ",programName)
-        #De cualquier modo, se regresa la lista
+            print("Error: Program does not exist: ",programName)
+        #In any case, the list is returned to the caller
         return cmd
 
     def getSolutionsByProgram(self,programName):
-        """Función que obtiene todos las soluciones esperadas para cada test del programa, contenidos en el archivo de soluciones
-           Argumentos:
-           programName: Nombre del programa del cual quiero obtener las soluciones esperadas"""
-        #La ejecucion requerira una bandera, que me dice que ya se estaban extrayendo las soluciones del programa que queria
+        """Function that fetches all the expected solutions for every test in the program, contained in the solution file (.solution)
+           Arguments:
+           programName: Name of the program for which I want to obtain the expected solutions"""
+        #The execution will require a flag that tells me that I am already in the process of extracting solutions
         flag = False
-        #Se inicia con una lista de soluciones vacia
+        #Start with an empty list
         solutions = []
-        #Se intenta abrir el archivo de soluciones. Este se obtiene del atributo de instancia. Se abre como de solo lectura
+        #Try to open the solution fine. This is read from the instance attribute. It is opened as read-only
         try:
             test = open(self.solutionFile,'r')
-        #Si no es posible encontrar el archivo, se informa y se regresa la lista vacía 
+        #If the file is not found, inform the user and return the empty list
         except FileNotFoundError:
-            print("Archivo de soluciones no encontrado: ",testFile)
+            print("Solution file not found: ",testFile)
 
-        #Por cada linea en el archivo
+        #For each line in the file
         for line in test:
-            #Se desprecian las lineas vacias (que solo tienen un |n)
+            #Empty lines are discarded (those with only an \n)
             line = line.replace('\n','');
-            #Si la linea no es una de estas vacias e inicia con ## eso significa que es el nombre de un programa
+            #If the line is not an empty line and it starts with ##, that means it is the name of a program.
             if line.startswith('##'):
-                #Si ya estaba sacando las soluciones, encontrar otro nombre de programa significa que ya acabé
+                #If the flag signals that the process of fetching solutions had already started, this means I found the end of the solution list for this program, so the loop breaks
                 if flag: break
-                #Si no elimina los ## para obtener el nombre puro
+                #If the process hasn't started, then the ## are eliminated to extract the name of the program
                 program = line.replace('##','')
-                #Si el programa que encontré es el que buscaba, levanta la bandera
+                #If this is the program I am looking for, the flags signals I'm starting the fetching process.
                 if program == programName.split('%')[0]:
                     flag = True
-            #Si no es un nombre de programa (iniciado con ##) y la bandera ya esta arriba, significa que es una solucion
+            #If this is not a program name (starting with ##) and the flag is up, then it means it is a solution from a test.
             elif line != '' and flag:
-                #Se agrega a la lista sustituyendo un salto de linea simulado por uno real
+                #Thus it is added to the solution list, replacing every simulated new line with a real new line.
                 solutions.append(line.replace("\\n","\n"))
-        #Se cierra el archivo
+        #The file is closed
         test.close()
-        #Si el archivo de soluciones terminó vacío, el programa no existía y se informa
+        #If the solution list did not exist for that program, then it is informed to the user
         if not solutions:
-            print("Error: No existe ese programa en el archivo de solucion",programName.split('%')[0])
-        #De cualquier forma se regresa el archivo de soluciones
+            print("Error: The program does not exist in the solution file.",programName.split('%')[0])
+        #In any case, the solution list is returned
         return solutions
 
     def compileSource(self,sourcefile):
-        """Funcion que se encarga de ejecutar el compilador gcc sobre un archivo fuente"""
+        """Function that handles the compilation of the source code using gcc."""
+        #The source code variable starts empty
         sourceCode = ""
+        #The source file is split in its many components
         src = sourcefile.split('%')
-        #if self.needsLib:
-        #    for lib in self.libs:
-        #        sourceCode += self.sourceCodeDir+lib+'.c'+' '
-        #sourceCode += self.sourceCodeDir+sourcefile+'.c'
+        #For every file in the list, the extension '.c' is added
         for f in src:
             sourceCode += ' '+self.sourceCodeDir+f+'.c'
+        #The destination path is set adding a .x to identify
         exeDestination = self.testDir + sourcefile.split('%')[0] +'.x'
+        #For each filename in source code after splitting it by whitespaces
         for code in sourceCode.strip().split(' '):
+            #if that name is not found or is not a file, it is informed to the user and it returns false.
             if not isfile(code):
-                print("Codigo fuente no encontrado: ", code)
+                print("Source code not found: ", code)
                 return False
+        #The compliation command is built
         cmd = 'gcc -o '+exeDestination+' '+sourceCode
+        #The subproccess to run the compilation command is opened
         proc = Popen(cmd , shell=True, stdout=PIPE, stderr=PIPE)
+        #the process is executed and its output read
         out, err = proc.communicate()
+        #if the process is succesful, the compilation was successful
         if proc.returncode == 0:
-            print("Programa compilado con exito: ",sourcefile.split('%')[0])
+            print("Succesful compilation of program: ",sourcefile.split('%')[0])
+            #Even then, there might be warnings to inform
             if err:
-                print("Advertencias: ",err.rstrip().decode('utf-8'))
+                print("Warnings: ",err.rstrip().decode('utf-8'))
+        #If the compilation fails, the errors are notified
         else:
-            print("Falló la compilación del programa: "+sourcefile+"\nErrores: ")
+            print("The compiliation of the program failed: "+sourcefile+"\nErrors: ")
             print(err.rstrip().decode('utf-8'))
             return False
         return True
